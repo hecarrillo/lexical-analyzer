@@ -12,8 +12,8 @@ fn main() {
     println!("Enter a string to validate:");
     let input: String = read_user_input();
     if dynamic_dfa::validate(&input) == Ok(()) {
-        println!("Valid string");
+        println!("Valid equation");
     } else {
-        println!("Invalid string");
+        println!("Invalid equation");
     }
 }

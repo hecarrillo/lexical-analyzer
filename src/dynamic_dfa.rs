@@ -101,7 +101,7 @@ fn get_input_token_array(s: &str, tokens: &Vec<String>) -> Result<Vec<String>, (
     }
 }
 
-fn validate_input(
+fn validate_input_and_print_symbol_table(
     input_token_array: &Vec<String>,
     dfa: &HashMap<String, HashMap<String, String>>,
     initial_state: &String,
@@ -110,7 +110,10 @@ fn validate_input(
 ) -> Result<(), ()> {
 
     let mut current_state = initial_state.to_string();
-    println!("initial state: {}", current_state);
+
+    println!("\ninitial state: {}\n", current_state);
+    println!("Symbol Table");
+    println!("------------");
 
     let mut buffer = String::new();
     let mut last_accepted_state = String::new();
@@ -161,6 +164,6 @@ pub fn validate(s: &str) -> Result<(), ()> {
     let dfa = get_transitions(&json, &states, &tokens);
     let initial_state = json["initial_state"].as_str().unwrap().to_string();
     let input_token_array: Vec<String> = get_input_token_array(s, &tokens)?;
-    validate_input(&input_token_array, &dfa, &initial_state, &accepted_states, &symbol_table)?;
+    validate_input_and_print_symbol_table(&input_token_array, &dfa, &initial_state, &accepted_states, &symbol_table)?;
     return Ok(());
 }
