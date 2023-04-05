@@ -101,50 +101,66 @@ fn get_input_token_array(s: &str, tokens: &Vec<String>) -> Result<Vec<String>, (
     }
 }
 
-fn get_symbol_table(
+fn validate_input(
     input_token_array: &Vec<String>,
     dfa: &HashMap<String, HashMap<String, String>>,
     initial_state: &String,
     accepted_states: &HashSet<String>,
+    symbol_table: &HashMap<String, String>,
 ) -> Result<(), ()> {
 
     let mut current_state = initial_state.to_string();
     println!("initial state: {}", current_state);
 
-    let mut largest_accepted_token = String::new();
+    let mut buffer = String::new();
     let mut last_accepted_state = String::new();
 
     for token in input_token_array {
-        // println!("⬇️");
-        // println!("{}", current_state);
-        let next_state = dfa[&current_state][token].to_string();
-        if dfa[&current_state][token] == "Error" {
+        let next_state = &dfa[&current_state][token];
+        if next_state == "rejected" {
             return Err(());
-        } else if next_state == "terminal" {
-            largest_accepted_token = token.to_string();
-            break;
         } else {
-            current_state = dfa[&current_state][token].to_string();
-            if 
+            if !accepted_states.contains(next_state) {
+                println!("token: {} token_type: {}", buffer, last_accepted_state);
+                buffer = String::new();
+            } else {
+                last_accepted_state = next_state.to_string();
+            }
+            buffer.push_str(token);
+            if symbol_table.contains_key(&buffer) {
+                println!("token: {} token_type: {}", buffer, symbol_table[&buffer].to_string());
+                buffer = String::new();
+            }
+            current_state = next_state.to_string();
         }
     }
 
     if accepted_states.contains(&current_state) {
+        println!("token: {} token_type: {}", buffer, last_accepted_state);
         Ok(())
     } else {
         Err(())
     }
 }
 
-pub fn get_valid_token(s: &str) -> Result<(), ()> {
+fn get_initial_symbol_table(json: &Value) -> HashMap<String, String> {
+    let mut symbol_table: HashMap<String, String> = HashMap::new();
+    let initial_symbol_table = json["initial_symbol_table"].as_object().unwrap();
+    for (key, value) in initial_symbol_table {
+        symbol_table.insert(key.to_string(), value.as_str().unwrap().to_string());
+    }
+    symbol_table
+}
+
+pub fn validate(s: &str) -> Result<(), ()> {
     let json = get_json();
     let states = get_states(&json);
     let tokens = get_tokens(&json);
+    let symbol_table = get_initial_symbol_table(&json);  
     let accepted_states: HashSet<String> = get_accepted_states(&json);
     let dfa = get_transitions(&json, &states, &tokens);
     let initial_state = json["initial_state"].as_str().unwrap().to_string();
     let input_token_array: Vec<String> = get_input_token_array(s, &tokens)?;
-    let symbol_table = 
-    validate_input(&input_token_array, &dfa, &initial_state, &accepted_states)?;
+    validate_input(&input_token_array, &dfa, &initial_state, &accepted_states, &symbol_table)?;
     return Ok(());
 }
