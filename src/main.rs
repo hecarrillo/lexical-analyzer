@@ -1,5 +1,5 @@
 mod dynamic_dfa;
-use std::{io};
+use std::io;
 
 fn read_user_input() -> String {
     let mut input = String::new();
@@ -12,8 +12,10 @@ fn main() {
     println!("Enter a string to validate:");
     let input: String = read_user_input();
     if dynamic_dfa::validate(&input) == Ok(()) {
-        println!("Valid equation");
+        print!("\nValidation Result:");
+        println!(" Valid equation");
     } else {
-        println!("Invalid equation");
+        print!("\nValidation Result:");
+        println!(" Invalid equation");
     }
 }
